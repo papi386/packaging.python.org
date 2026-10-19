@@ -28,7 +28,7 @@ jobs:
     permissions:
       contents: read
     outputs:
-      artifact-id: ${{ steps.upload.outputs.artifact-id }}
+      artifact-id: ${{ steps.upload.outputs.intentionally-missing }}
 
     steps:
       # Use the event's immutable base revision, not the candidate or moving main.
