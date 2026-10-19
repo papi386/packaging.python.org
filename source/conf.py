@@ -248,3 +248,9 @@ todo_include_todos = True
 
 copybutton_prompt_text = r">>> |\.\.\. |\$ |> "
 copybutton_prompt_is_regexp = True
+
+
+def setup(app):
+    from pug_sphinx_extensions.linkcheck import configure_linkcheck
+
+    app.connect("builder-inited", configure_linkcheck)
