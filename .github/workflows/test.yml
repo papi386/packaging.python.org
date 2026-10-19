@@ -148,6 +148,15 @@ jobs:
           merge-multiple: true
           digest-mismatch: error
 
+      - name: Inject malformed baseline after successful download
+        shell: python
+        env:
+          BASELINE_PATH: ${{ runner.temp }}/linkcheck-baseline/output.json
+        run: |
+          import os
+          from pathlib import Path
+          Path(os.environ['BASELINE_PATH']).write_text('{broken\n', encoding='utf-8')
+
       - *candidate-nox
 
 
