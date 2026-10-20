@@ -148,6 +148,28 @@ jobs:
           merge-multiple: true
           digest-mismatch: error
 
+      # Fork-only probe. Never print the token or change the PR permissions.
+      - name: Probe GitHub token access
+        shell: python
+        env:
+          LINKCHECK_PROBE_TOKEN: ${{ github.token }}
+        run: |
+          import json
+          import os
+          from urllib.request import Request, urlopen
+
+          token = os.environ["LINKCHECK_PROBE_TOKEN"]
+          headers = {"Authorization": f"Bearer {token}", "User-Agent": "pypa-linkcheck-fork-probe"}
+          with urlopen(Request("https://api.github.com/rate_limit", headers=headers), timeout=20) as response:
+              limit = int(json.load(response)["resources"]["core"]["limit"])
+          with urlopen(Request("https://api.github.com/repos/pypa/packaging.python.org", headers=headers), timeout=20) as response:
+              api_status = response.status
+          with urlopen(Request("https://github.com/pypa/packaging.python.org", headers=headers), timeout=20) as response:
+              web_status = response.status
+          print("TOKEN_PROBE " + json.dumps({"core_limit": limit, "api_status": api_status, "web_status": web_status}), flush=True)
+          if limit < 1000 or api_status != 200 or web_status != 200:
+              raise SystemExit("GitHub token is not effective for linkcheck targets")
+
       - *candidate-nox
 
 

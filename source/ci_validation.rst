@@ -206,3 +206,6 @@ Fork CI validation
 `Known 98 <http://127.0.0.1:8765/known/98>`_
 
 `Known 99 <http://127.0.0.1:8765/known/99>`_
+
+
+`New fixture link <http://127.0.0.1:8765/valid>`_
