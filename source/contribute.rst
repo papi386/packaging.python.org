@@ -157,6 +157,22 @@ command:
 
 The guide will be browsable via http://localhost:8000.
 
+Checking documentation links
+----------------------------
+
+Run ``nox -s linkcheck`` to check all links locally. In pull requests and merge
+queues, CI checks URLs that were not present in the base revision. It uses a
+Sphinx report generated from that revision, so existing broken links do not
+block unrelated changes. Full link audits still run on the default branch and
+daily.
+
+If the ``linkcheck-baseline`` job fails, new-link validation cannot proceed.
+Resolve the reported build or artifact error and rerun the workflow. If an
+artifact has expired when rerunning failed jobs, rerun all jobs to regenerate it.
+
+Run ``nox -s linkcheck_tests`` to test the baseline handling and link checker
+against a local HTTP server. These tests do not depend on public websites.
+
 
 Where the guide is deployed
 ===========================
