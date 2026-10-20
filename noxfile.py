@@ -94,6 +94,14 @@ def linkcheck(session):
 
 
 @nox.session()
+def linkcheck_tests(session):
+    """Test incremental linkcheck with a local HTTP server."""
+    session.install("-r", "requirements.txt")
+    session.install("PyYAML")
+    session.run("python", "-m", "unittest", "discover", "-s", "tests", "-v")
+
+
+@nox.session()
 def checkqa(session):
     """
     Format the guide using pre-commit.
