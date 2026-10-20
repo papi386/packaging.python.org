@@ -137,6 +137,37 @@ jobs:
           if not re.fullmatch(r"[1-9][0-9]*", os.environ["BASELINE_ARTIFACT_ID"]):
               raise SystemExit("Missing or invalid baseline artifact ID")
 
+      # Fork-only fault injection: the local validation driver deletes this
+      # exact artifact. No write token is granted to the workflow.
+      - name: Wait for external baseline deletion
+        shell: python
+        env:
+          BASELINE_ARTIFACT_ID: ${{ needs.linkcheck-baseline.outputs.artifact-id }}
+          VALIDATION_REPOSITORY: ${{ github.repository }}
+        run: |
+          import os
+          import re
+          import time
+          from urllib.error import HTTPError
+          from urllib.request import Request, urlopen
+
+          artifact_id = os.environ["BASELINE_ARTIFACT_ID"]
+          if not re.fullmatch(r"[1-9][0-9]*", artifact_id):
+              raise SystemExit("Missing baseline artifact ID")
+          url = f"https://api.github.com/repos/{os.environ['VALIDATION_REPOSITORY']}/actions/artifacts/{artifact_id}"
+          for _ in range(150):
+              try:
+                  with urlopen(Request(url, headers={"Accept": "application/vnd.github+json"}), timeout=15):
+                      pass
+              except HTTPError as exc:
+                  if exc.code == 404:
+                      print(f"Confirmed artifact {artifact_id} is unavailable", flush=True)
+                      break
+                  raise
+              time.sleep(2)
+          else:
+              raise SystemExit("Timed out waiting for external artifact deletion")
+
       - name: Download baseline from this run
         if: >-
           matrix.noxenv == 'linkcheck' &&
